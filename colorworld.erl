@@ -28,7 +28,8 @@ color_world() ->
     NDL = lists:sort(fun(A,B) -> length(element(2, A)) > length(element(2,B)) end,world:neighbors()),
     CC = element(1, hd(NDL)),
     color_world([{CC,0}],tl(NDL),neighbor_dict()).
-color_world(L,[],_) -> L;
+color_world(L,[],_) -> 
+    {L, length(L), lists:foldr(fun(E,Acc) -> max(Acc,element(2,E)) end, 0, L)+1};
 color_world(L,[H|T],D) ->
     CL = dict:fetch_keys(D),
     NC = firstnotusedcolor(L,neighbors(element(1,H),D),length(CL)),
