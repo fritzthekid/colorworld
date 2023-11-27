@@ -29,7 +29,7 @@ color_world() ->
     CC = element(1, hd(NDL)),
     color_world([{CC,0}],tl(NDL),neighbor_dict()).
 color_world(L,[],_) -> 
-    {L, length(L), lists:foldr(fun(E,Acc) -> max(Acc,element(2,E)) end, 0, L)+1};
+    {L, length(L), lists:foldr(fun(E,Acc) -> max(Acc,element(2,E)) end, 0, L)};
 color_world(L,[H|T],D) ->
     CL = dict:fetch_keys(D),
     NC = firstnotusedcolor(L,neighbors(element(1,H),D),length(CL)),
@@ -39,7 +39,7 @@ firstnotusedcolor(L,Neighbors,N) ->
     ColorD = dict:from_list(L),
     ColoredNeighbors = lists:filter(fun(C) -> lists:member(C,dict:fetch_keys(ColorD)) end, Neighbors), 
     ColorsUsed = lists:foldr(fun(C, Acc) -> [dict:fetch(C,ColorD)]++Acc end, [], ColoredNeighbors),
-    lists:min(lists:filter(fun(C) -> lists:member(C,ColorsUsed) =:= false end, lists:seq(0,N))).
+    lists:min(lists:filter(fun(C) -> lists:member(C,ColorsUsed) =:= false end, lists:seq(1,N))).
 	      
 neighbor_dict() ->
     dict:from_list(world:neighbors()).
