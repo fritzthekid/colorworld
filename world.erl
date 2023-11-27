@@ -1,11 +1,5 @@
 -module(world).
--export([countries/0, neighbors/0]).
-
-countries() ->
-    [de,fr,sp,pr,it,ju,gr,hu,sl,oe,tc,po,dk,nl,bl,lx,ch,oz,
-     v0, %% virtual country 0
-     bw  %% black world
-    ].
+-export([neighbors/0]).
 
 neighbors() ->
     [{de,[dk,nl,bl,lx,fr,ch,oe,tc,po,oz]},
@@ -25,8 +19,8 @@ neighbors() ->
      {bl,[de,nl,fr,lx,v0,oz]},
      {lx,[de,bl,fr]},
      {ch,[de,fr,it,oe]},
-     {v0,[pr,sp,fr,bl,oz]},
-     {bw,[gr,ju,hu,sl,po,oz]},
+     {v0,[pr,sp,fr,bl,oz]},     %% virtual country 0
+     {bw,[gr,ju,hu,sl,po,oz]},  %% black world
      {oz,[de,nl,bl,fr,sp,po,it,ju,gr,pr,dk,v0,bw]}
     ].
 
