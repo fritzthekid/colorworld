@@ -1,4 +1,4 @@
--module(checkworld).
+-module(colorworld).
 -export([color_world/0]).
 
 check_neighbors() ->
