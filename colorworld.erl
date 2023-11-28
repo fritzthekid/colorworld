@@ -1,8 +1,7 @@
 -module(colorworld).
--export([color_world/0]).
+-export([color_world/0, color_world/1]).
 
-check_neighbors() ->
-    D = neighbor_dict(),
+check_neighbors(D) ->
     C = dict:fetch_keys(D),
     lists:foldr(fun(CC, Acc) ->
 		      L = dict:fetch(CC,D),
@@ -17,17 +16,18 @@ check_neighbors() ->
 					end,
 					0, L) 
 		end, 0, C).
-
 color_world() ->
-    N = check_neighbors(),
+    color_world(neighbor_dict()).
+color_world(D) ->
+    N = check_neighbors(D),
     if N =/= 0 ->
 	    throw({"check_neighbors() failed.\n"});
        true ->
 	    ok
     end,
-    NDL = lists:sort(fun(A,B) -> length(element(2, A)) > length(element(2,B)) end,world:neighbors()),
+    NDL = lists:sort(fun(A,B) -> length(element(2, A)) > length(element(2,B)) end,dict:to_list(D)),
     CC = element(1, hd(NDL)),
-    color_world([{CC,0}],tl(NDL),neighbor_dict()).
+    color_world([{CC,0}],tl(NDL),D).
 color_world(L,[],_) -> 
     {L, length(L), lists:foldr(fun(E,Acc) -> max(Acc,element(2,E)) end, 0, L)};
 color_world(L,[H|T],D) ->
