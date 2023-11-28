@@ -1,2 +1,9 @@
-# Color The World
+# colorworld
+=====
 
+An OTP application
+
+Build
+-----
+
+    $ rebar3 compile
