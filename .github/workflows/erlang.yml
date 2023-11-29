@@ -19,4 +19,7 @@ jobs:
     - name: Compile
       run: rebar3 compile
     - name: Run tests
-      run: rebar3 do eunit
+      run: |
+        rebar3 do eunit
+        rebar3 cover -m 84
+
