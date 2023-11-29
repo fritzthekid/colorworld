@@ -3,6 +3,10 @@
 %% color_world/1 could be color_world(gengraph:gengraph(150,20)) - just random graph (not planar)
 -module(colorworld).
 -export([color_world/0, color_world/1]).
+%% for eunit tests
+-ifdef(EXPORTALL).
+-compile(export_all).
+-endif.
 
 check_neighbors(WL) ->
     C = countries(WL),
