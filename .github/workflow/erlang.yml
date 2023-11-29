@@ -2,12 +2,7 @@ name: Erlang CI
 
 on:
   push:
-    branches:
-    - main
-    - develop
   pull_request:
-    branhes:
-    - main
 
 permissions:
   contents: read
