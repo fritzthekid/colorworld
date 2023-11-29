@@ -1,8 +1,6 @@
 name: Erlang CI
 
-on:
-  push:
-  pull_request:
+on: [push, pull_request, workflow:dispatch]
 
 permissions:
   contents: read
