@@ -1,4 +1,4 @@
--module(planar).
+-module(cwplanar).
 -compile(export_all).
 
 %% https://math.stackexchange.com/questions/3727153/prove-this-graph-is-not-planar

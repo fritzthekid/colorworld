@@ -1,5 +1,5 @@
--module(gengraph).
--export([gen_graph/2]).
+-module(cwgraph).
+-export([gen_graph/2,neighbor_struct_to_graph/1]).
 
 %% generates some random graph, could be of any shape - not planar
 %% arguments:
@@ -19,8 +19,31 @@ gen_graph(N,M) ->
     NewOrderd = sets:to_list(sets:from_list(Orderd)),
     SinIdents = lists:filter(fun(E)->element(1,E) =/= element(2,E) end, NewOrderd),
     Sorted = lists:sort(fun(A,B) -> element(1,A) < element(1,B) end, SinIdents),
+    %% Renamed = lists:foldr(fun(E,Acc) -> 
+    %% 				  [{{v,element(1,E)},{v,element(2,E)}}]
+    %% 				      ++ Acc
+    %% 			  end, [], Sorted),
     Renamed = lists:foldr(fun(E,Acc) -> 
-				  [{{v,element(1,E)},{v,element(2,E)}}]
-				      ++ Acc
+				  V1="v"++integer_to_list(element(1,E)),
+				  V2="v"++integer_to_list(element(2,E)),
+				  [{V1,V2}] ++ Acc
 			  end, [], Sorted),
     Renamed.
+
+neighbor_struct_to_graph(NeighborStruct) ->
+    Graph = lists:foldr(fun(E,Acc) ->
+			Acc++
+			    lists:foldr(fun(N,Acc1) ->
+						[{element(1,E),N}]++Acc1
+					end, [], element(2,E))
+			end, [], NeighborStruct),
+    Sorted = lists:foldr(fun(E,Acc) ->
+				 if 
+				     element(1,E) < element(2,E) ->
+					 Acc++[E];
+				     true ->
+					 Acc++[{element(2,E),element(1,E)}]
+				 end
+			 end, [], Graph),
+    lists:sort(fun(A,B) -> element(1,A) < element(1,B) end, sets:to_list(sets:from_list(Sorted))).
+

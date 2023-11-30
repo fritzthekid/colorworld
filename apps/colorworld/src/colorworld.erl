@@ -1,6 +1,6 @@
 %% color some graph, if planar should be not more than 4 colors
 %% color_world/0 colors only europe (from the graph in world.erl)
-%% color_world/1 could be color_world(gengraph:gengraph(150,20)) - just random graph (not planar)
+%% color_world/1 could be color_world(cwgraph:cwgraph(150,20)) - just random graph (not planar)
 -module(colorworld).
 -export([color_world/0, color_world/1]).
 %% for eunit tests
@@ -27,7 +27,7 @@ check_neighbors(WL) ->
 %%% color_world assign color to every vertice (countries)
 
 color_world() ->
-    color_world(world:world_graph()).
+    color_world(cwworld:world_graph()).
 color_world(WL) ->
     N = check_neighbors(WL),
     if N =/= 0 ->
