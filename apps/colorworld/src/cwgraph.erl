@@ -1,5 +1,5 @@
 -module(cwgraph).
--export([gen_graph/2,neighbor_struct_to_graph/1]).
+-export([gen_graph/2, countries/1, neighbors/2, neighbor_struct_to_graph/1]).
 
 %% generates some random graph, could be of any shape - not planar
 %% arguments:
@@ -29,6 +29,25 @@ gen_graph(N,M) ->
 				  [{V1,V2}] ++ Acc
 			  end, [], Sorted),
     Renamed.
+
+neighbors(C,L) ->
+    lists:foldr(fun(E,Acc) ->
+			 if 
+			     element(1,E) =:= C ->
+				 Acc ++ [element(2,E)];
+			     element(2,E) =:= C ->
+				 Acc ++ [element(1,E)];
+			     true ->
+				 Acc
+			 end
+		end, [], L).
+
+countries(L) ->
+    R = lists:foldr(fun(E,Acc) ->  Acc ++ [element(1,E), element(2,E)] end, [], L),
+    sets:to_list(sets:from_list(R)).
+
+neighbor_struct(WL) ->
+    lists:foldr(fun(C, Acc) -> Acc ++ [{C,neighbors(C,WL)}] end,[],countries(WL)).
 
 neighbor_struct_to_graph(NeighborStruct) ->
     Graph = lists:foldr(fun(E,Acc) ->
