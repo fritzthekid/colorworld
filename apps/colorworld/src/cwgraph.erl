@@ -1,5 +1,5 @@
 -module(cwgraph).
--export([gen_graph/2, countries/1, neighbors/2, neighbor_struct_to_graph/1]).
+-export([gen_graph/2, countries/1, neighbors/2, neighbor_struct_to_graph/1, neighbor_struct/1]).
 
 %% generates some random graph, could be of any shape - not planar
 %% arguments:

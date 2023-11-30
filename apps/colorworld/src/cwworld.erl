@@ -1,6 +1,10 @@
 %% only part of europe
 -module(cwworld).
 -export([world_neighbors/0, world_neighbors_unquoted/0, world_neighbors_quoted/0 ,world_graph/0]).
+%% for eunit tests
+-ifdef(EXPORTALL).
+-compile(export_all).
+-endif.
 
 world_neighbors() ->
     world_neighbors_quoted().
