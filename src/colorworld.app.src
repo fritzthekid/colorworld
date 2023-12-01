@@ -2,7 +2,6 @@
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {colorworld_app, []}},
   {applications,
    [kernel,
     stdlib
@@ -11,5 +10,5 @@
   {modules, []},
 
   {licenses, ["Apache 2.0"]},
-  {links, []}
+  {links, [{"Github","https://github.com/fritzthekid/colorworld.git"}]}
  ]}.
