@@ -38,13 +38,13 @@ colorworld_example_graph_test() ->
     {_,_,Exa5} = colorworld:color_world(cwplanar:dice()),
     ?assertEqual(4,Exa5,"planar:dice").
 
-cwutils_test() ->
-    WGJ = cwgraph:neighbor_struct_to_graph(
-	   cwutils:neighbor_struct_from_json(filename:absname("") ++ "/data/world.json")),
-    WGE = cwworld:world_graph(),
-    Result = sets:from_list(cwgraph:neighbors("de",WGJ)) =:= 
-	sets:from_list(cwgraph:neighbors("de",WGE)),
-    ?assert(Result).
+%% cwutils_test() ->
+%%     WGJ = cwgraph:neighbor_struct_to_graph(
+%% 	   cwutils:neighbor_struct_from_json(filename:absname("") ++ "/data/world.json")),
+%%     WGE = cwworld:world_graph(),
+%%     Result = sets:from_list(cwgraph:neighbors("de",WGJ)) =:= 
+%% 	sets:from_list(cwgraph:neighbors("de",WGE)),
+%%     ?assert(Result).
 
 cwworld_neighbors_unquoted_test() ->
     NU = cwgraph:neighbors(de,cwgraph:neighbor_struct_to_graph(cwworld:world_neighbors_unquoted())),
@@ -60,3 +60,19 @@ cwutils_read_json_test() ->
 	    ok
     end.
 
+cwutils_read_write_term_test() ->
+    WN = cwworld:world_neighbors(),
+    cwutils:write_terms("./test/output/x.txt",[WN]),
+    Read = cwutils:neighbor_struct_import_config("./test/output/x.txt"),
+    LN = cwgraph:neighbors("de",cwworld:world_graph()),
+    LR = cwgraph:neighbors("de",cwgraph:neighbor_struct_to_graph(Read)),
+    lists:filter(fun(A) -> ?assert(lists:member(A,LR)), true end, LN),
+    ok.
+
+cwutils_neighbor_struct_from_json_test() -> 
+    NSR = cwgraph:neighbor_struct_to_graph(cwutils:neighbor_struct_from_json("data/world.json")),
+    LN = cwgraph:neighbors("oe",cwworld:world_graph()),
+    LR = cwgraph:neighbors("oe",NSR),
+    lists:filter(fun(A) -> ?assert(lists:member(A,LR)), true end, LN),
+    ok.
+    

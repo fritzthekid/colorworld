@@ -31,3 +31,13 @@ dice() ->
      {o,a},{o,b},{o,c},{o,d},
      {a,c}
     ].
+
+plane(Country, NG) ->
+    N = cwgraph:neighbors(Country, NG),
+    Plane = lists:foldr(fun(CC, Acc) -> [{lists:filter(fun(C) -> 
+						       lists:member(CC,cwgraph:neighbors(C,NG))end, 
+					       cwgraph:neighbors(CC,NG))}]++Acc end, [], N),
+    io:format("Grenzen ~s: ",[Country]),
+    lists:filter(fun(C) -> io:format(",~w",[C]), true end, Plane),
+    io:format("\n"),
+    Plane.
