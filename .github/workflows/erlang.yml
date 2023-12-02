@@ -20,8 +20,10 @@ jobs:
       run: rebar3 compile | tee report.log
     - name: Run tests
       run: |
-        rebar3 eunit --cover --verbose | tee -a report.log
-        rebar3 cover -m 80 --verbose | tee -a report.log
+        rebar3 eunit --cover --verbose > report.log
+        cat report.log
+        rebar3 cover -m 80 --verbose > x.log
+        cat x.log | tee -a report.log
     - uses: actions/upload-artifact@v3
       with:
         name: report

@@ -67,7 +67,6 @@ cwutils_read_write_term_test() ->
     LN = cwgraph:neighbors("de",cwworld:world_graph()),
     LR = cwgraph:neighbors("de",cwgraph:neighbor_struct_to_graph(Read)),
     lists:filter(fun(A) -> ?assert(lists:member(A,LR)), true end, LN),
-    ?assert(false),
     ok.
 
 cwutils_neighbor_struct_from_json_test() -> 
