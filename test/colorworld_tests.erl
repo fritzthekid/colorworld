@@ -27,16 +27,16 @@ colorworld_gengraph_test() ->
     ?assert(Count>15,"Only less then 15 vertices").
 
 colorworld_example_graph_test() ->
-    {_,_,Exa1} = colorworld:color_world(cwplanar:nonplanargraph()),
+    {_,_,Exa1} = colorworld:color_world(cwplanar:graphs(nonplanargraph)),
     ?assertEqual(3,Exa1,"planar:nonplanargraph"),
-    {_,_,Exa2} = colorworld:color_world(cwplanar:fourcolorsgraph()),
+    {_,_,Exa2} = colorworld:color_world(cwplanar:graphs(fourcolorsgraph)),
     ?assertEqual(4,Exa2,"planar:fourcolorsgraph"),
-    {_,_,Exa3} = colorworld:color_world(cwplanar:simple_fivecolor()),
+    {_,_,Exa3} = colorworld:color_world(cwplanar:graphs(simple_fivecolor)),
     ?assertEqual(5,Exa3,"planar:simple_fivecolor"),
-    {_,_,Exa4} = colorworld:color_world(cwplanar:bipartite_graph()),
+    {_,_,Exa4} = colorworld:color_world(cwplanar:graphs(bipartite_graph)),
     ?assertEqual(3,Exa4,"planar:bipartite_graph"),
-    {_,_,Exa5} = colorworld:color_world(cwplanar:dice()),
-    ?assertEqual(4,Exa5,"planar:dice").
+    {_,_,Exa5} = colorworld:color_world(cwplanar:graphs(dice)),
+					?assertEqual(4,Exa5,"planar:dice").
 
 %% cwutils_test() ->
 %%     WGJ = cwgraph:neighbor_struct_to_graph(
@@ -62,8 +62,8 @@ cwutils_read_json_test() ->
 
 cwutils_read_write_term_test() ->
     WN = cwworld:world_neighbors(),
-    cwutils:write_terms("./test/output/x.txt",[WN]),
-    Read = cwutils:neighbor_struct_import_config("./test/output/x.txt"),
+    cwutils:write_terms("./test/outputs/x.txt",[WN]),
+    Read = cwutils:neighbor_struct_import_config("./test/outputs/x.txt"),
     LN = cwgraph:neighbors("de",cwworld:world_graph()),
     LR = cwgraph:neighbors("de",cwgraph:neighbor_struct_to_graph(Read)),
     lists:filter(fun(A) -> ?assert(lists:member(A,LR)), true end, LN),
@@ -76,3 +76,9 @@ cwutils_neighbor_struct_from_json_test() ->
     lists:filter(fun(A) -> ?assert(lists:member(A,LR)), true end, LN),
     ok.
     
+cwplanar_planes_test() ->
+    N=length(cwplanar:planes("de",cwworld:world_graph())),
+    R = lists:member(["fr","bl"], cwplanar:planes("lx",cwworld:world_graph())),
+    ?assertEqual(9,N),
+    ?assert(R),
+    ok.
