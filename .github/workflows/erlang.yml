@@ -17,13 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Compile
-      run: rebar3 compile
+      run: rebar3 compile | tee report.log
     - name: Run tests
       run: |
-        rebar3 eunit --cover
-        rebar3 cover -m 80
+        rebar3 eunit --cover --verbose | tee -a report.log
+        rebar3 cover -m 80 --verbose | tee -a report.log
     - uses: actions/upload-artifact@v3
       with:
-        name: coverage
-        path: _build/test/cover/
+        name: report
+        path: report.log
+
 
