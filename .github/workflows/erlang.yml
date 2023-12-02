@@ -22,4 +22,8 @@ jobs:
       run: |
         rebar3 eunit --cover
         rebar3 cover -m 80
+    - uses: actions/upload-artifact@v3
+      with:
+        name: coverage
+        path: _build/test/cover/
 
