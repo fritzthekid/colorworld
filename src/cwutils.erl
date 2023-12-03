@@ -5,7 +5,11 @@ read_json(Filename) ->
     {Ret, JStr} = file:read_file(Filename),
     if 
 	Ret == ok ->
-	    mochijson:decode(JStr);
+	    try
+		mochijson_to_term(mochijson:decode(JStr))
+	    catch error:_ ->
+		    throw({"file is not a json file."})
+	    end;
 	true ->
 	    throw({"file not found."})
     end.
@@ -20,90 +24,55 @@ write_terms(Filename, List) ->
     file:write_file(Filename, Text).
 
 neighbor_struct_from_json(Filename) ->
-    {struct, L} = read_json(Filename),
-    lists:foldr(fun({H,{array, T}},Acc) -> 
-			Acc ++ [{H,T}] 
-		end, 
-		[],L).
+    Map = read_json(Filename),
+    maps:fold(fun(K,V,AccIn)->AccIn ++[{K,V}] end, [],Map).
 
-%% write_json(Filename, Dict) ->
-%%     TJ = mochistruct_from_dict(Dict),
-%%     JB = mochijson2:encode(TJ),
-%%     file:write_file(Filename, JB),
-%%     io:format("write json: ~s, keys: ~w\n",[Filename, dict:fetch_keys(Dict)]).
+mochijson_to_term(Obj) ->
+    Isstr = ismochistruct(Obj),
+    Isarr = ismochiarray(Obj),
+    if
+	Isstr ->
+	    {_,T} = Obj,
+	    mochistruct_to_map(T);
+	Isarr ->
+	    {_,T} = Obj,
+	    mochiarray_to_list(T);
+	%%is_list(Obj) ->
+	%%    lists:foldr(fun(E,Acc)->Acc++[mochijson_to_term(E)] end, [], Obj);
+	true ->
+	    Obj
+    end.
 
-%% neighbors_struct_export(Filename, Neighbors) ->
-%%     MS = {stuct, lists:foldr(fun({H,T},Acc) -> [{H,{array,T}}] ++ Acc end, [], Neighbors)},
-%%     JB = mochijson2:encode(MS),
-%%     file:write_file(Filename, JB).
-%%     %% io:format("write json: ~s, keys: ~w\n",[Filename, dict:fetch_keys(Dict)]).
-    
-%% mochistruct_from_dict(Dict) ->
-%%     io:format("from_dict ~w  ~w\n",[dict:fetch_keys(Dict),dict:fetch(hd(dict:fetch_keys(Dict)),Dict)]),
-%%     L = lists:foldr(fun(X,Acc) -> 
-%% 			    IsdictEntry = isdictEntry(element(2,X)),
-%% 			    IslistEntry = is_list(element(2,X)),
-%% 			    if
-%% 				IsdictEntry ->
-%% 				    io:format("isdict; ~w\n",[element(2,X)]),
-%% 				    Y= {element(1,X),mochistruct_from_dict(element(2,X))};
-%% 				IslistEntry -> 
-%% 				    Y = mochistruct_from_list(X);
-%% 				true ->
-%% 				    Y = X
-%% 			    end,
-%% 			    Acc++[Y] end, [], dict:to_list(Dict)),
-%%     {struct, L}.
+mochistruct_to_map(L) ->
+    maps:from_list(lists:foldl(fun({H,T},Acc)->Acc++[{H,mochijson_to_term(T)}] end,[], L)).
 
-%% mochistruct_from_list({H,List}) ->
-%%     L = lists:foldr(fun(X,Acc) -> 
-%% 			    IsdictEntry = false,%%isdictEntry(element(2,X)),
-%% 			    IslistEntry = false,%%is_list(element(2,X)), %listEntry(element(2,X)),
-%% 			    if
-%% 				IsdictEntry ->
-%% 				    Y= {element(1,X),mochistruct_from_dict(dict:from_list([element(2,X)]))};
-%% 				IslistEntry -> 
-%% 				    Y = mochistruct_from_list(X);
-%% 				true ->
-%% 				    Y = X
-%% 			    end,
-%% 			    Acc++[Y] end, [], List),
-%%     {H, {array, L}}.
+mochiarray_to_list(L) ->
+    lists:foldl(fun(E,Acc)->Acc++[mochijson_to_term(E)] end,[], L).
 
-%% isdictEntry(A) ->
-%%     %% A = element(2,E),
-%%     if
-%% 	is_tuple(A) ->
-%% 	    if 
-%% 		element(1,A) =:=dict ->
-%% 		    true;
-%% 		true ->
-%% 		    false
-%% 	    end;
-%% 	true ->
-%% 	    false
-%%     end.
-%%     %% A = element(2,E),
-%%     %% try dict:to_list(element(2,E)) of
-%%     %% 	_ ->
-%%     %% 	    true
-%%     %% catch
-%%     %% 	excetion:_Reason ->
-%%     %% 	    false
-%%     %% end.
-%%     %% IsTuple = is_tuple(A),
-%%     %% if 
-%%     %% 	IsTuple ->
-%%     %% 	    (is_list(element(1,A))) and (tuple_size(A) =:= 2);
-%%     %% 	true ->
-%%     %% 	    false
-%%     %% end.
+ismochistruct(Obj) ->
+    if 
+	is_tuple(Obj) ->
+	    if
+		(tuple_size(Obj) =:= 2) ->
+		    {H,L} = Obj, 
+		    (H =:= struct) and is_list(L);
+		true ->
+		    false
+	    end;
+	true ->
+	    false
+    end.
 
-%% islistEntry(A) ->
-%%     IsTuple = is_tuple(A),
-%%     if 
-%% 	IsTuple ->
-%% 	    (is_list(element(1,A))) and (tuple_size(A) =:= 2);
-%% 	true ->
-%% 	    false
-%%     end.
+ismochiarray(Obj) ->
+    if 
+	is_tuple(Obj) ->
+	    if
+		(tuple_size(Obj) =:= 2) ->
+		    {H,L} = Obj, 
+		    (H =:= array) and is_list(L);
+		true ->
+		    false
+	    end;
+	true ->
+	    false
+    end.

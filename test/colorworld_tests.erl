@@ -52,9 +52,15 @@ cwworld_neighbors_unquoted_test() ->
     Result = (length(NU) == length(NQ)),
     ?assert(Result).
 
-cwutils_read_json_test() ->
+cwutils_read_json_errors_test() ->
     try
 	cwutils:read_json("x.txt")
+    catch
+	_ ->
+	    ok
+    end,
+    try
+	cwutils:read_json("data/world.txt")
     catch
 	_ ->
 	    ok
