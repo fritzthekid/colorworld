@@ -1,4 +1,4 @@
--module(codegenerator).
+-module(xgen).
 -compile(export_all).
 %%-export([gen_code]).
 
@@ -6,7 +6,7 @@ gen_code() ->
     Network=cwutils:read_json("data/network.json"),
     Text = gen_layers(maps:get("layers",Network)),
     io:format("~s",[Text]),
-    Text.
+    binary:list_to_bin(Text).
 
 gen_layers([]) ->
     io_lib:format("/*end*/\n",[]);
@@ -40,3 +40,9 @@ for_loop(P0,M,N) ->
     ++
 	io_lib:format("return;",[]).
 
+-ifdef(REBARTEST).
+-include_lib("eunit/include/eunit.hrl").
+codegen_test() ->
+    Text = gen_code().
+    %%?assert(length(Text)> 50).
+-endif.
