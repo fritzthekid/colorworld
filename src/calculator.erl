@@ -1,9 +1,6 @@
 -module(calculator).
 -compile(export_all).
 
-finalizer(PIDL) ->
-    lists:filter(fun(PID) -> PID ! finished,true end, PIDL).
-
 add() ->
     %%io:format("add started\n",[]),
     receive
@@ -134,6 +131,8 @@ calcunit(PIDs, ArgL, [H|Tail]) ->
 	    calcunit(PIDs,[Prod]++Targs,Tail)
     end.
 
+finalizer(PIDL) ->
+    lists:filter(fun(PID) -> PID ! finished,true end, PIDL).
 
 -ifdef(REBARTEST).
 -include_lib("eunit/include/eunit.hrl").

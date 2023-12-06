@@ -18,6 +18,7 @@ neighbor_struct_import_config(Filename) ->
     {ok, [Data]} = file:consult(Filename),
     Data.
 
+%% From: (opposite to file:consult) https://zxq9.com/archives/1021
 write_terms(Filename, List) ->
     Format = fun(Term) -> io_lib:format("~tp.~n", [Term]) end,
     Text = unicode:characters_to_binary(lists:map(Format, List)),

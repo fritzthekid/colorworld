@@ -12,6 +12,7 @@ start(Num, Wait) ->
 	    ok	
     end.
 
+%% From: https://stackoverflow.com/questions/44629823/how-to-apply-timeout-on-method-in-erlang  
 tear_down(PIDL, Name, MasterPID)->
   YourTimeOut = 10,
   Self = self(),
@@ -33,12 +34,12 @@ tear_down(PIDL, Name, MasterPID)->
 finalizer(PIDL) ->
     lists:filter(fun(PID) -> PID ! finished,true end, PIDL).
 
-tail(N, M) ->
+tail(_N, _M) ->
     receive
 	finished ->
-	    Wait = round(M*rand:uniform()),
+	    Wait = round(_M*rand:uniform()),
 	    timer:sleep(Wait),
-	    %%io:format("tail finished ~w (~w)~n", [N,Wait]),
+	    %%io:format("tail finished ~w (~w)~n", [_N,Wait]),
 	    ok;
 	{tear_down, _} ->
 	    io:format("tail does something~n", []),

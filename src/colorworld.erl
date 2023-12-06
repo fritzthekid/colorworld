@@ -4,7 +4,7 @@
 -module(colorworld).
 -export([color_world/0, color_world/1]).
 %% for eunit tests
--ifdef(EXPORTALL).
+-ifdef(REBARTEST).
 -compile(export_all).
 -endif.
 
