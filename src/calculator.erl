@@ -1,4 +1,5 @@
 -module(calculator).
+-export([do/0, do/1]).
 -compile(export_all).
 
 
@@ -9,10 +10,10 @@ do() ->
 do(Tasks) ->
     PIDA = spawn(calculator,add,[]),
     PIDM = spawn(calculator,mul,[]),
-    PIDF = spawn(calculator,fak,[]),
+    PIDF = spawn(calculator,fact,[]),
     PIDSum = spawn(calculator,sum,[]),
     PIDs = [[{"job",add},{"pid",PIDA}],[{"job",mul},{"pid",PIDM}]] ++
-		[[{"job",fak},{"pid",PIDF}],[{"job",sum},{"pid",PIDSum}]],
+		[[{"job",fact},{"pid",PIDF}],[{"job",sum},{"pid",PIDSum}]],
     PIDSup = spawn(calculator, supervisor, [length(Tasks),PIDs,[],self()]),
     lists:filter(fun(T) -> 
 			 spawn(calculator,
@@ -93,12 +94,12 @@ calcunit(PIDs, ArgL, [H|Tail]) ->
 					[A|[B|_]] = ArgL,
 					PIDM ! { calcunit, self(), A, B }
 	    	end;
-		fak ->
+		fact ->
 			if 
 				(length(ArgL) =:= 0) ->
-					calcunit(PIDs, ArgL ++ [fak], []);
+					calcunit(PIDs, ArgL ++ [fact], []);
 				true ->
-					PIDF = get_pid(fak,PIDs),
+					PIDF = get_pid(fact,PIDs),
 					[A|_] = ArgL,
 					PIDF ! { calcunit, self(), A }
 	    	end;
@@ -110,7 +111,7 @@ calcunit(PIDs, ArgL, [H|Tail]) ->
 	    	calcunit(PIDs, [H] ++ ArgL, Tail)
     end,
     receive
-		{ fak, _, Res } ->
+		{ fact, _, Res } ->
 			[_|Targs] = ArgL,
 			calcunit(PIDs,[Res]++Targs,Tail);
 		{ sum, _, Res } ->
@@ -143,14 +144,14 @@ mul() ->
 	    mul()
     end.
 
-fak() ->
+fact() ->
     receive
 		finished ->
 			ok;
 		{calcunit,X_PID, A} ->
-			io:format("fak: ~w\n",[A]),
-			X_PID ! {fak, self(), fakrec(A)},
-			fak()
+			io:format("fact: ~w\n",[A]),
+			X_PID ! {fact, self(), factrec(A)},
+			fact()
     end.
 
 sum() ->
@@ -164,16 +165,16 @@ sum() ->
     end.
 
 
-fakrec(N) ->
+factrec(N) ->
 	if
 		(N < 1) ->
 			0;
 		true ->
-			fakrec(1,N)
+			factrec(1,N)
 	end.
-fakrec(Acc, 1) -> Acc;
-fakrec(Acc, X) ->
-	fakrec(Acc*X,X-1).
+factrec(Acc, 1) -> Acc;
+factrec(Acc, X) ->
+	factrec(Acc*X,X-1).
 
 -ifdef(REBARTEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -187,6 +188,6 @@ multi_task_calculator_test() ->
     Results = do([[1,1,add],[7,3,add,mul],[2]]),
     ?assertEqual(3,(length(Results))),
     ?assertEqual(1,(length(lists:filter(fun(X)->length(X)>1 end,Results)))),
-	?assertEqual(137,hd(hd(do([[17,3,2,add,fak,sum]])))),
+    ?assertEqual(137,hd(hd(do([[17,3,2,add,fact,sum]])))),
     ok.
 -endif.
