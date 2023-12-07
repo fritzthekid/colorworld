@@ -4,7 +4,7 @@
 -module(colorworld).
 -export([color_world/0, color_world/1]).
 %% for eunit tests
--ifdef(EXPORTALL).
+-ifdef(REBARTEST).
 -compile(export_all).
 -endif.
 
@@ -45,9 +45,6 @@ color_world(ColL,[H|T],WL) ->
     color_world(ColL++[{element(1,H),NC}],T,WL).
 
 firstnotusedcolor(L,Neighbors,N) ->
-    ColorD = dict:from_list(L),
-    ColoredNeighbors = lists:filter(fun(C) -> lists:member(C,dict:fetch_keys(ColorD)) end, Neighbors), 
-    ColorsUsed = lists:foldr(fun(C, Acc) -> [dict:fetch(C,ColorD)]++Acc end, [], ColoredNeighbors),
+    ColorsUsed = maps:fold(fun(C,Col,Acc) ->  X = lists:member(C,Neighbors), if X -> [Col]++Acc;
+						 true -> Acc end end, [], maps:from_list(L)),
     lists:min(lists:filter(fun(C) -> lists:member(C,ColorsUsed) =:= false end, lists:seq(1,N))).
-	      
-

@@ -1,0 +1,10 @@
+{
+    "layers":
+    [
+	{"class":"dense","name":"hansx","weights":"p0","bias":"p1","inout":[2,3]},
+	{"class":"conv","name":"lise","weights":"p0","bias":"p1","inout":[2,3]},
+	{"class":"none","name":"otto","weights":"p0","bias":"p1","inout":[2,3]},
+	{"class":"dense","name":"fritz","weights":"p2","bias":"p3","inout":[2,1]}
+    ]
+}
+

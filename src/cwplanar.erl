@@ -1,5 +1,20 @@
 -module(cwplanar).
--compile(export_all).
+%%-compile(export_all).
+-export([graphs/1, planes/2, borders/3]).
+
+graphs(Name) ->
+    if 
+	Name =:= nonplanargraph ->
+	    nonplanargraph();
+	Name =:= fourcolorsgraph ->
+	    fourcolorsgraph();
+	Name =:= simple_fivecolor ->
+	    simple_fivecolor();
+	Name =:= bipartite_graph ->
+	    bipartite_graph();
+	true ->
+	    dice()
+    end.
 
 %% https://math.stackexchange.com/questions/3727153/prove-this-graph-is-not-planar
 nonplanargraph() ->
@@ -31,3 +46,17 @@ dice() ->
      {o,a},{o,b},{o,c},{o,d},
      {a,c}
     ].
+
+%% get the borders of a country (vertex)
+planes(Country, NG) ->
+    lists:foldr(fun(C,Acc) ->
+		      [borders(Country,C,NG)] ++ Acc 
+		end, 
+		[],
+		cwgraph:neighbors(Country,NG)).
+
+borders(Country, CC, NG) ->
+    lists:filter(fun(C) ->
+			 lists:member(Country, cwgraph:neighbors(C,NG))
+		 end,
+		 cwgraph:neighbors(CC,NG)).
