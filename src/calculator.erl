@@ -1,29 +1,6 @@
 -module(calculator).
 -compile(export_all).
 
-add() ->
-    %%io:format("add started\n",[]),
-    receive
-	finished ->
-	    ok; %%io:format("add finished\n",[]);
-	{calcunit, X_PID, A, B} ->
-	    io:format("add: ~w + ~w\n",[A,B]),
-	    X_PID ! {add, self(), A+B},
-	    add()
-    end.
-
-mul() ->
-    %%io:format("mul started\n",[]),
-    receive
-	finished ->
-	    ok; %%io:format("mul finished\n",[]);
-	{calcunit,X_PID, A, B} ->
-	    io:format("mul: ~w * ~w\n",[A,B]),
-	    X_PID ! {mul, self(), A*B},
-	    mul()
-	%%calcunit ->
-	%%    io:format("mul do nothing\n",[])	    
-    end.
 
 do() ->
     TaskA = [3,4,mul,5,add],
@@ -32,7 +9,10 @@ do() ->
 do(Tasks) ->
     PIDA = spawn(calculator,add,[]),
     PIDM = spawn(calculator,mul,[]),
-    PIDs = [[{"job",add},{"pid",PIDA}],[{"job",mul},{"pid",PIDM}]],
+    PIDF = spawn(calculator,fak,[]),
+    PIDSum = spawn(calculator,sum,[]),
+    PIDs = [[{"job",add},{"pid",PIDA}],[{"job",mul},{"pid",PIDM}]] ++
+		[[{"job",fak},{"pid",PIDF}],[{"job",sum},{"pid",PIDSum}]],
     PIDSup = spawn(calculator, supervisor, [length(Tasks),PIDs,[],self()]),
     lists:filter(fun(T) -> 
 			 spawn(calculator,
@@ -85,54 +65,115 @@ get_pid(T,PIDs,ExPID) ->
 
 calcunit(PIDs, Args, []) ->
     if 
-	(length(Args) > 1) ->
-	    io:format("Fails (last operation with only one argument: ~w\n",[Args]);
-	true ->
-	    io:format("Result: ~w\n",[Args])
+		(length(Args) > 1) ->
+			io:format("Fails! (arguments do not fit last operation): ~p)\n",[Args]);
+		true ->
+			io:format("Result: ~p\n",[Args])
     end,
-    %%io:format("tell supervisor this task is over.\n",[]),
     PIDSup = get_pid(sup,PIDs),
     PIDSup ! { calcunit, self(), Args };
 calcunit(PIDs, ArgL, [H|Tail]) ->
-    %%io:format("calcunit started (~w)\n",[self()]),
-    PIDA = get_pid(add,PIDs),
-    %%io:format("calcunit: PIDA (~w)\n",[PIDA]),
-    PIDM = get_pid(mul,PIDs),
-    %%io:format("calcunit: PIDA (~w), PIDM (~w)\n",[PIDA,PIDM]),
-    if 
-	H =:= add ->
-	    %%io:format("do add\n",[]),
-	    if 
-		(length(ArgL) < 2) ->
-		    calcunit(PIDs, ArgL ++ [mul], []);
-		true ->
-		    [A|[B|_]] = ArgL,
-		    PIDA ! { calcunit, self(), A, B }
-	    end;
-        H =:= mul ->
-	    %%io:format("do mul\n",[]),
-	    if 
-		(length(ArgL) < 2) ->
-		    calcunit(PIDs, ArgL ++ [mul], []);
-		true ->
-		    [A|[B|_]] = ArgL,
-		    PIDM ! { calcunit, self(), A, B }
-	    end;
-	true ->
-	    %%io:format("shift arguments\n",[]),
-	    calcunit(PIDs, [H] ++ ArgL, Tail)
+	io:format("calcunit: ~p ~p ~p\n",[ArgL,H,Tail]),
+    case H of
+		add ->
+			if 
+				(length(ArgL) < 2) ->
+					calcunit(PIDs, ArgL ++ [add], []);
+				true ->
+				    PIDA = get_pid(add,PIDs),
+					[A|[B|_]] = ArgL,
+					PIDA ! { calcunit, self(), A, B }
+			end;
+		mul ->
+			if 
+				(length(ArgL) < 2) ->
+					calcunit(PIDs, ArgL ++ [mul], []);
+				true ->
+    				PIDM = get_pid(mul,PIDs),
+					[A|[B|_]] = ArgL,
+					PIDM ! { calcunit, self(), A, B }
+	    	end;
+		fak ->
+			if 
+				(length(ArgL) =:= 0) ->
+					calcunit(PIDs, ArgL ++ [fak], []);
+				true ->
+					PIDF = get_pid(fak,PIDs),
+					[A|_] = ArgL,
+					PIDF ! { calcunit, self(), A }
+	    	end;
+		sum ->
+			PIDSum = get_pid(sum,PIDs),
+			PIDSum ! { calcunit, self(), ArgL };
+		_Default ->
+			%% shift arguments to arglist
+	    	calcunit(PIDs, [H] ++ ArgL, Tail)
     end,
     receive
-	{ add, _, Sum } ->
-	    [_|[_|Targs]] = ArgL,
-	    calcunit(PIDs,[Sum]++Targs,Tail);
-	{ mul, _, Prod } ->
-	    [_|[_|Targs]] = ArgL,
-	    calcunit(PIDs,[Prod]++Targs,Tail)
+		{ fak, _, Res } ->
+			[_|Targs] = ArgL,
+			calcunit(PIDs,[Res]++Targs,Tail);
+		{ sum, _, Res } ->
+			calcunit(PIDs,[Res],Tail);
+		{ _Task, _, Result} ->
+			[_|[_|Targs]] = ArgL,
+			calcunit(PIDs,[Result]++Targs,Tail)
     end.
 
 finalizer(PIDL) ->
     lists:filter(fun(PID) -> PID ! finished,true end, PIDL).
+
+add() ->
+    receive
+		finished ->
+			ok;
+		{calcunit, X_PID, A, B} ->
+			io:format("add: ~w + ~w\n",[A,B]),
+			X_PID ! {add, self(), A+B},
+			add()
+    end.
+
+mul() ->
+    receive
+	finished ->
+	    ok;
+	{calcunit,X_PID, A, B} ->
+	    io:format("mul: ~w * ~w\n",[A,B]),
+	    X_PID ! {mul, self(), A*B},
+	    mul()
+    end.
+
+fak() ->
+    receive
+		finished ->
+			ok;
+		{calcunit,X_PID, A} ->
+			io:format("fak: ~w\n",[A]),
+			X_PID ! {fak, self(), fakrec(A)},
+			fak()
+    end.
+
+sum() ->
+    receive
+		finished ->
+			ok;
+		{calcunit,X_PID, Args} ->
+			io:format("sum: ~p \n",[Args]),
+			X_PID ! {sum, self(), lists:sum(Args)},
+			sum()
+    end.
+
+
+fakrec(N) ->
+	if
+		(N < 1) ->
+			0;
+		true ->
+			fakrec(1,N)
+	end.
+fakrec(Acc, 1) -> Acc;
+fakrec(Acc, X) ->
+	fakrec(Acc*X,X-1).
 
 -ifdef(REBARTEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -146,5 +187,6 @@ multi_task_calculator_test() ->
     Results = do([[1,1,add],[7,3,add,mul],[2]]),
     ?assertEqual(3,(length(Results))),
     ?assertEqual(1,(length(lists:filter(fun(X)->length(X)>1 end,Results)))),
+	?assertEqual(137,hd(hd(do([[17,3,2,add,fak,sum]])))),
     ok.
 -endif.
