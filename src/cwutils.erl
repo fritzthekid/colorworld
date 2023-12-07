@@ -77,3 +77,14 @@ ismochiarray(Obj) ->
 	true ->
 	    false
     end.
+
+-ifdef(REBARTEST).
+-include_lib("eunit/include/eunit.hrl").
+cwutils_isstruct_isarry_test() ->
+    ?assert((false==ismochistruct({1}))),
+    ?assert((false==ismochistruct(1))),
+    ?assert((ismochistruct({struct,[]}))),
+    ?assert((false==ismochiarray({1}))),    
+    ?assert((false==ismochiarray(1))),    
+    ?assert(ismochiarray({array,[]})).    
+-endif.
