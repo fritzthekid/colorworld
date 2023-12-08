@@ -24,7 +24,7 @@ jobs:
       run: |
         ( 
           rebar3 eunit --cover --verbose | tee -a report.log
-          test $PIPESTATUS == 0 || exit $PIPESTATUS 
+          exit $PIPESTATUS 
         )
         cat x.log | tee -a report.log
         rebar3 cover -m 80 --verbose > x.log
