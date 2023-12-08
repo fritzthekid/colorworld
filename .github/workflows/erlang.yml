@@ -22,7 +22,10 @@ jobs:
         cat report.log
     - name: Run tests
       run: |
-        rebar3 eunit --cover --verbose > x.log
+        ( 
+          rebar3 eunit --cover --verbose | tee -a report.log
+          [ $PIPESTATUS -eq 0 ] || exit $PIPESTATUS 
+        )
         cat x.log | tee -a report.log
         rebar3 cover -m 80 --verbose > x.log
         cat x.log | tee -a report.log
