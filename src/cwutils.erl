@@ -86,6 +86,5 @@ cwutils_isstruct_isarry_test() ->
     ?assert((ismochistruct({struct,[]}))),
     ?assert((false==ismochiarray({1}))),    
     ?assert((false==ismochiarray(1))),
-    ?assert(false),
     ?assert(ismochiarray({array,[]})).
 -endif.
